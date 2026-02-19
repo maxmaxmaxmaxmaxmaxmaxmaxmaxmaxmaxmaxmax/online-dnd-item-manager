@@ -1,10 +1,13 @@
 package com.earthmelon.odim.item;
 
 import java.awt.*;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
-public class Item {
+public class Item implements Serializable {
+    public static int ID_COUNT = 0;
+
     // First entry is row count, second is column count.
     List<Integer> size;
 
@@ -17,7 +20,11 @@ public class Item {
 
     Image image;
 
+    int id;
+
     public Item(String name, String description, int rows, int cols, int[] values) {
+        this.id = ID_COUNT;
+        ID_COUNT++;
         this.name = name;
         this.description = description;
         this.size = List.of(rows, cols);
@@ -25,6 +32,8 @@ public class Item {
     }
 
     public Item(String name, String description, int rows, int cols, int value) {
+        this.id = ID_COUNT;
+        ID_COUNT++;
         this.name = name;
         this.description = description;
         this.size = List.of(rows, cols);
@@ -32,6 +41,8 @@ public class Item {
     }
 
     public Item(List<Integer> dimensions, int[] values) {
+        this.id = ID_COUNT;
+        ID_COUNT++;
         this.size = List.of(dimensions.get(0), dimensions.get(1));
         this.value = values;
     }

@@ -8,29 +8,47 @@ import javax.swing.border.BevelBorder;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+
 import java.util.LinkedList;
 
-public class Main {
+import java.io.*;
+import java.net.*;
+
+public class Client {
     public static final JFrame MAIN_WINDOW = new JFrame("ODIM");
     private static final GraphicsEnvironment GRAPHICS = GraphicsEnvironment.getLocalGraphicsEnvironment();
     public static final GraphicsDevice DEVICE = GRAPHICS.getDefaultScreenDevice();
 
-    // TODO: Move to server class when it exists.
-    public static LinkedList<Item> ALL_ITEMS = new LinkedList<>();
-
-    // TODO: Move to client class when it exists.
     public static JPanel ITEM_LIST_PANEL = new JPanel();
+    public static LinkedList<Item> MY_KNOWN_ITEMS = new LinkedList<>();
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 
-//        DEVICE.setFullScreenWindow(MAIN_WINDOW);
+        String host = "localhost";
+        int port = 7999;
+        Socket s = new Socket(host, port);
+        assembleUI();
 
+        while (true) {
+            if (!MY_KNOWN_ITEMS.isEmpty()) {
+                System.out.println("Writing item: " + MY_KNOWN_ITEMS.getLast());
+                ObjectOutputStream os = new ObjectOutputStream(s.getOutputStream());
+                os.writeObject(MY_KNOWN_ITEMS.getLast());
+                os.close();
+            }
+            Thread.sleep(1000);
+        }
+
+    }
+
+    private static void assembleUI() {
         MAIN_WINDOW.setSize(400, 400);
 
         // Ends the program when the window closes.
         MAIN_WINDOW.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent windowEvent){
-                System.out.println(ALL_ITEMS);
+                System.out.println(Server.ALL_ITEMS);
+                System.out.println(MY_KNOWN_ITEMS);
                 System.exit(0);
             }
         });
@@ -42,8 +60,6 @@ public class Main {
         JButton addItem = new JButton("Add Item");
         addItem.addActionListener(new CreateItemPanelAction());
         addItem.setBounds(0,0,50,50);
-//        addItem.setVerticalTextPosition(SwingConstants.TOP);
-//        addItem.setHorizontalTextPosition(AbstractButton.LEADING);
         addItem.setActionCommand("add_item");
 
         MAIN_WINDOW.add(ITEM_LIST_PANEL);
