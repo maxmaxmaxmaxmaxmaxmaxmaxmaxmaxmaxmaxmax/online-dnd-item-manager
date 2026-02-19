@@ -1,3 +1,6 @@
+package com.earthmelon.odim.item;
+
+import java.awt.*;
 import java.util.Arrays;
 import java.util.List;
 
@@ -8,12 +11,22 @@ public class Item {
     // Measured as an array as such: [platinum, gold, silver, bronze]
     int[] value;
 
-    public Item(int rows, int cols, int[] values) {
+    String name;
+
+    String description;
+
+    Image image;
+
+    public Item(String name, String description, int rows, int cols, int[] values) {
+        this.name = name;
+        this.description = description;
         this.size = List.of(rows, cols);
         this.value = values;
     }
 
-    public Item(int rows, int cols, int value) {
+    public Item(String name, String description, int rows, int cols, int value) {
+        this.name = name;
+        this.description = description;
         this.size = List.of(rows, cols);
         this.value = new int[]{0,0,0,value};
     }
@@ -24,7 +37,7 @@ public class Item {
     }
 
     public Item rotate() {
-        return new Item(this.size, this.value);
+        return new Item(this.size.reversed(), this.value);
     }
 
     public Item convertToFewestCoins() {
@@ -39,5 +52,10 @@ public class Item {
         copyOfValues[index-1] = copyOfValues[index-1] + stored;
         copyOfValues[index] = copyOfValues[index] - stored * exchangeRate;
         return new Item(this.size, copyOfValues);
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }
