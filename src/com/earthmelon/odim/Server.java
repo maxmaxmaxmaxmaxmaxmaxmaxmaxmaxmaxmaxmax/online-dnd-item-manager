@@ -30,9 +30,8 @@ public class Server {
             if (fromClient instanceof Item clientItem && !ALL_ITEMS.contains(fromClient)) {
                 ALL_ITEMS.add(clientItem);
                 ODIMlog.info("Item received: {}", clientItem);
-                System.out.println("Item received: " + clientItem);
+                System.out.println("Item received: " + clientItem + " " + ALL_ITEMS);
                 is.close();
-                System.exit(0);
             }
             is.close();
             Thread.sleep(1000);

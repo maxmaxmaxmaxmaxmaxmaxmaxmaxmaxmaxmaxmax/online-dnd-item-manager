@@ -22,6 +22,8 @@ public class Client {
     public static JPanel ITEM_LIST_PANEL = new JPanel();
     public static LinkedList<Item> MY_KNOWN_ITEMS = new LinkedList<>();
 
+    static int previousSize = 0;
+
     public static void main(String[] args) throws Exception {
 
         String host = "localhost";
@@ -30,11 +32,12 @@ public class Client {
         assembleUI();
 
         while (true) {
-            if (!MY_KNOWN_ITEMS.isEmpty()) {
+            if (!MY_KNOWN_ITEMS.isEmpty() && MY_KNOWN_ITEMS.size() > previousSize) {
                 System.out.println("Writing item: " + MY_KNOWN_ITEMS.getLast());
                 ObjectOutputStream os = new ObjectOutputStream(s.getOutputStream());
                 os.writeObject(MY_KNOWN_ITEMS.getLast());
                 os.close();
+                previousSize = MY_KNOWN_ITEMS.size();
             }
             Thread.sleep(1000);
         }
