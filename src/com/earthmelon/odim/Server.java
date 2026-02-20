@@ -14,7 +14,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.LinkedList;
-import java.util.List;
 
 public class Server {
 
@@ -22,7 +21,7 @@ public class Server {
 
     public static LinkedList<Item> ALL_ITEMS = new LinkedList<>();
 
-    public static void main(String[] args) throws Exception {
+    static void main(String[] args) throws Exception {
         Configurator.setLevel("ODIM", Level.INFO);
         ODIMlog.info("<SERVER> Logger online.");
         int port = 7999;
@@ -62,9 +61,8 @@ public class Server {
                 ODIMlog.info("<SERVER> Server item list now: {}", ALL_ITEMS);
             }
             if (fromClient instanceof String str) {
-                ODIMlog.info("<CLIENT> " + str);
+                ODIMlog.info("<CLIENT> {}", str);
             }
-            Thread.sleep(1000);
         }
     }
 }

@@ -43,7 +43,6 @@ public class Client {
                 os.writeObject(MY_KNOWN_ITEMS);
                 previousSize = MY_KNOWN_ITEMS.size();
             }
-            Thread.sleep(1000);
         }
         os.close();
     }
