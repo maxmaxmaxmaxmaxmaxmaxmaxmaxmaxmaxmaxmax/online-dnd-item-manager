@@ -70,6 +70,10 @@ public class Item implements Serializable {
         return value;
     }
 
+    public List<Integer> getSize() {
+        return size;
+    }
+
     public Item rotate() {
         return new Item(this.name, this.description, this.size.reversed(), this.value);
     }
@@ -90,6 +94,11 @@ public class Item implements Serializable {
 
     @Override
     public String toString() {
-        return name + ": " + description + " " + Arrays.toString(value);
+        return id + " " + name + ": " + description;
+    }
+
+    @Override
+    public boolean equals(Object anObject) {
+        return anObject instanceof Item item && this.id == item.getId();
     }
 }

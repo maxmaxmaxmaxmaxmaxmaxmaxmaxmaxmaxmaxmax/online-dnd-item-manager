@@ -1,5 +1,6 @@
 package com.earthmelon.odim.item;
 
+import java.util.Objects;
 import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -28,5 +29,15 @@ public class TestItem {
         Item tested = new Item("Test Item", "Test description", 0,0,1000);
         int[] correct = new int[]{0,0,10,0};
         assertArrayEquals(correct, tested.convertToFewestCoins().getValue());
+    }
+
+    @org.junit.Test
+    public void testEquals1() {
+        Item tested = new Item("Name", "Description", 0,0,0);
+        Item equal = new Item("Name", "Description", 0,0,0);
+        assertEquals(tested, tested);
+        assertNotEquals(tested, equal);
+        assertTrue(Objects.equals(tested, tested));
+        assertFalse(Objects.equals(tested, equal));
     }
 }
