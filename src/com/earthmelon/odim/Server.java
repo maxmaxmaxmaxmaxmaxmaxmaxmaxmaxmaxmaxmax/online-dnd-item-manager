@@ -5,12 +5,14 @@ import com.earthmelon.odim.item.Item;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.config.Configurator;
 
 import java.io.EOFException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -21,11 +23,13 @@ public class Server {
     public static LinkedList<Item> ALL_ITEMS = new LinkedList<>();
 
     public static void main(String[] args) throws Exception {
-        ODIMlog.info("Logger online.");
+        Configurator.setLevel("ODIM", Level.INFO);
+        ODIMlog.info("<SERVER> Logger online.");
         int port = 7999;
         ServerSocket s = new ServerSocket(port);
+        ODIMlog.info("<SERVER> Server established, awaiting connection.");
         Socket client = s.accept();
-        ODIMlog.info("Server online at port {}", port);
+        ODIMlog.info("<SERVER> Connection established at port {}", port);
         ObjectInputStream dataFromClientStream = new ObjectInputStream(client.getInputStream());
 
         while (true) {
@@ -33,25 +37,30 @@ public class Server {
             Object fromClient;
             try {
                 fromClient = dataFromClientStream.readObject();
-            } catch (EOFException e) {
-                continue;
+            } catch (EOFException | SocketException e) {
+                ODIMlog.info("<SERVER> Client disconnected, waiting...");
+                client = s.accept();
+                ODIMlog.info("<SERVER> Client reconnected.");
+                dataFromClientStream = new ObjectInputStream(client.getInputStream());
+                fromClient = dataFromClientStream.readObject();
             }
 
             if (fromClient instanceof LinkedList<?> clientList) {
                 for (Object object : clientList) {
-                    System.out.println(object);
                     if (object instanceof Item item) {
                         if (ALL_ITEMS.contains(item)) {
-                            ODIMlog.error("Item contained in list: " + item);
+                            ODIMlog.error("<SERVER> Item contained in list: " + item);
                             continue;
                         }
                         ALL_ITEMS.add(item);
-                        ODIMlog.info("Item received: {}", item);
+                        ODIMlog.info("<SERVER> Item received: {}", item);
                     } else {
-                        ODIMlog.error("Object " + object + " is not of type Item, but instead " + object.getClass());
+                        ODIMlog.error("<SERVER> Object " + object + " is not of type Item, but instead " + object.getClass());
                     }
                 }
-                System.out.println(ALL_ITEMS);
+            }
+            if (fromClient instanceof String str) {
+                ODIMlog.info("<CLIENT> " + str);
             }
             Thread.sleep(1000);
         }
