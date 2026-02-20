@@ -28,13 +28,13 @@ public class Client {
 
         String host = "localhost";
         int port = 7999;
-        Socket s = new Socket(host, port);
+        Socket clientSocket = new Socket(host, port);
         assembleUI();
 
         while (true) {
             if (!MY_KNOWN_ITEMS.isEmpty() && MY_KNOWN_ITEMS.size() > previousSize) {
                 System.out.println("Writing item: " + MY_KNOWN_ITEMS.getLast());
-                ObjectOutputStream os = new ObjectOutputStream(s.getOutputStream());
+                ObjectOutputStream os = new ObjectOutputStream(clientSocket.getOutputStream());
                 os.writeObject(MY_KNOWN_ITEMS.getLast());
                 os.close();
                 previousSize = MY_KNOWN_ITEMS.size();
