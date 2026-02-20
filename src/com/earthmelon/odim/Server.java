@@ -2,13 +2,17 @@ package com.earthmelon.odim;
 
 import com.earthmelon.odim.item.Item;
 
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.EOFException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.LinkedList;
+import java.util.List;
 
 public class Server {
 
@@ -22,19 +26,33 @@ public class Server {
         ServerSocket s = new ServerSocket(port);
         Socket client = s.accept();
         ODIMlog.info("Server online at port {}", port);
+        ObjectInputStream dataFromClientStream = new ObjectInputStream(client.getInputStream());
 
-        while (true) {
-            ObjectInputStream is = new ObjectInputStream(client.getInputStream());
-            Object fromClient = is.readObject();
-
-            if (fromClient instanceof Item clientItem && !ALL_ITEMS.contains(fromClient)) {
-                ALL_ITEMS.add(clientItem);
-                ODIMlog.info("Item received: {}", clientItem);
-                System.out.println("Item received: " + clientItem + " " + ALL_ITEMS);
-                is.close();
+        while (!client.isClosed()) {
+//            ObjectOutputStream allItemsForClientSync = new ObjectOutputStream(client.getOutputStream());
+            Object fromClient;
+            try {
+                fromClient = dataFromClientStream.readObject();
+            } catch (EOFException e) {
+                continue;
             }
-            is.close();
+
+            if (fromClient instanceof LinkedList<?> clientList && !ALL_ITEMS.equals(clientList)) {
+                ALL_ITEMS.clear();
+                for (Object object : clientList) {
+                    if (object instanceof Item item) {
+                        ALL_ITEMS.add(item);
+                        System.out.println(ALL_ITEMS);
+                        ODIMlog.info("Item received: {}", clientList);
+                    } else {
+                        ODIMlog.error("Object " + object + " is not of type Item, but instead " + object.getClass());
+                    }
+                }
+            }
             Thread.sleep(1000);
         }
+        dataFromClientStream.close();
+        System.out.println(ALL_ITEMS);
+        System.exit(0);
     }
 }

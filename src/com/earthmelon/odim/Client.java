@@ -31,17 +31,18 @@ public class Client {
         Socket clientSocket = new Socket(host, port);
         assembleUI();
 
-        while (true) {
-            if (!MY_KNOWN_ITEMS.isEmpty() && MY_KNOWN_ITEMS.size() > previousSize) {
+
+        ObjectOutputStream os = new ObjectOutputStream(clientSocket.getOutputStream());
+        while (!clientSocket.isClosed()) {
+            if (MY_KNOWN_ITEMS.size() > previousSize) {
                 System.out.println("Writing item: " + MY_KNOWN_ITEMS.getLast());
-                ObjectOutputStream os = new ObjectOutputStream(clientSocket.getOutputStream());
-                os.writeObject(MY_KNOWN_ITEMS.getLast());
-                os.close();
+
+                os.writeObject(MY_KNOWN_ITEMS);
                 previousSize = MY_KNOWN_ITEMS.size();
             }
             Thread.sleep(1000);
         }
-
+        os.close();
     }
 
     private static void assembleUI() {
@@ -50,7 +51,6 @@ public class Client {
         // Ends the program when the window closes.
         MAIN_WINDOW.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent windowEvent){
-                System.out.println(Server.ALL_ITEMS);
                 System.out.println(MY_KNOWN_ITEMS);
                 System.exit(0);
             }
