@@ -28,7 +28,7 @@ public class Server {
         ODIMlog.info("Server online at port {}", port);
         ObjectInputStream dataFromClientStream = new ObjectInputStream(client.getInputStream());
 
-        while (!client.isClosed()) {
+        while (true) {
 //            ObjectOutputStream allItemsForClientSync = new ObjectOutputStream(client.getOutputStream());
             Object fromClient;
             try {
@@ -37,22 +37,23 @@ public class Server {
                 continue;
             }
 
-            if (fromClient instanceof LinkedList<?> clientList && !ALL_ITEMS.equals(clientList)) {
-                ALL_ITEMS.clear();
+            if (fromClient instanceof LinkedList<?> clientList) {
                 for (Object object : clientList) {
+                    System.out.println(object);
                     if (object instanceof Item item) {
+                        if (ALL_ITEMS.contains(item)) {
+                            ODIMlog.error("Item contained in list: " + item);
+                            continue;
+                        }
                         ALL_ITEMS.add(item);
-                        System.out.println(ALL_ITEMS);
-                        ODIMlog.info("Item received: {}", clientList);
+                        ODIMlog.info("Item received: {}", item);
                     } else {
                         ODIMlog.error("Object " + object + " is not of type Item, but instead " + object.getClass());
                     }
                 }
+                System.out.println(ALL_ITEMS);
             }
             Thread.sleep(1000);
         }
-        dataFromClientStream.close();
-        System.out.println(ALL_ITEMS);
-        System.exit(0);
     }
 }

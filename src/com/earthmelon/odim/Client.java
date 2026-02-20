@@ -35,8 +35,10 @@ public class Client {
         ObjectOutputStream os = new ObjectOutputStream(clientSocket.getOutputStream());
         while (!clientSocket.isClosed()) {
             if (MY_KNOWN_ITEMS.size() > previousSize) {
-                System.out.println("Writing item: " + MY_KNOWN_ITEMS.getLast());
+                System.out.println("Writing list: " + MY_KNOWN_ITEMS);
 
+                // Added item gets sent here but not when added via AddItemAction.
+                MY_KNOWN_ITEMS.add(new Item("Test Item", "Test Description", 0,0,0));
                 os.writeObject(MY_KNOWN_ITEMS);
                 previousSize = MY_KNOWN_ITEMS.size();
             }
