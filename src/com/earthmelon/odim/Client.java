@@ -37,9 +37,8 @@ public class Client {
         while (!clientSocket.isClosed()) {
             if (MY_KNOWN_ITEMS.size() > previousSize) {
                 os.writeObject("Writing list: " + MY_KNOWN_ITEMS);
-
                 // Added item gets sent here but not when added via AddItemAction.
-                MY_KNOWN_ITEMS.add(new Item("Test Item", "Test Description", 0,0,0));
+//                MY_KNOWN_ITEMS.add(new Item("Test Item", "Test Description", 0,0,0));
                 os.writeObject(MY_KNOWN_ITEMS);
                 previousSize = MY_KNOWN_ITEMS.size();
             }

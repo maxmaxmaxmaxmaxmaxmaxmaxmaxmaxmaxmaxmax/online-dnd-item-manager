@@ -46,14 +46,15 @@ public class Server {
             }
 
             if (fromClient instanceof LinkedList<?> clientList) {
+                ODIMlog.info("<SERVER> Item list received. " + clientList);
                 for (Object object : clientList) {
                     if (object instanceof Item item) {
                         if (ALL_ITEMS.contains(item)) {
-                            ODIMlog.error("<SERVER> Item contained in list: " + item);
+                            ODIMlog.info("<SERVER> Item contained in list: " + item);
                             continue;
                         }
                         ALL_ITEMS.add(item);
-                        ODIMlog.info("<SERVER> Item received: {}", item);
+                        ODIMlog.info("<SERVER> Item added: {}", item);
                     } else {
                         ODIMlog.error("<SERVER> Object " + object + " is not of type Item, but instead " + object.getClass());
                     }
