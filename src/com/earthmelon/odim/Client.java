@@ -16,8 +16,6 @@ import java.net.*;
 
 public class Client {
     public static final JFrame MAIN_WINDOW = new JFrame("ODIM");
-    private static final GraphicsEnvironment GRAPHICS = GraphicsEnvironment.getLocalGraphicsEnvironment();
-    public static final GraphicsDevice DEVICE = GRAPHICS.getDefaultScreenDevice();
 
     public static JPanel ITEM_LIST_PANEL = new JPanel();
     public static LinkedList<Item> MY_KNOWN_ITEMS = new LinkedList<>();

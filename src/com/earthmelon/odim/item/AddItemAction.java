@@ -1,12 +1,11 @@
 package com.earthmelon.odim.item;
 
 import com.earthmelon.odim.Client;
-import com.earthmelon.odim.Server;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.ObjectOutputStream;
+
 import java.util.Random;
 
 public class AddItemAction implements ActionListener {
