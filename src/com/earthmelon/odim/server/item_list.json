@@ -1,9 +1,1 @@
-{
-"0":{
-"name":"Test Item","id":0
-},"1":{
-"name":"Test Item","id":1
-},"2":{
-"name":"Test Item","id":2
-}
-}
+{"0":{"image":"NOT YET IMPLEMENTED","size":[0,0],"name":"Test Item","description":"Test description","value":[0,0,0,24]},"1":{"image":"NOT YET IMPLEMENTED","size":[0,0],"name":"Test Item","description":"Test description","value":[0,0,0,10]},"2":{"image":"NOT YET IMPLEMENTED","size":[0,0],"name":"Test Item","description":"Test description","value":[0,0,0,73]}}

@@ -11,10 +11,8 @@ import javax.swing.*;
 
 import org.json.*;
 
-import java.io.EOFException;
-import java.io.File;
-import java.io.IOException;
-import java.io.ObjectInputStream;
+import java.awt.*;
+import java.io.*;
 
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -27,6 +25,7 @@ public class Server {
 
     public static Logger LOGGER = LogManager.getLogger("ODIM");
     public static final JFrame SERVER_WINDOW = new JFrame("ODIMServer");
+    public static File itemSaveLocation = new File("src/com/earthmelon/odim/server/item_list.json");
 
     public static LinkedList<Item> ALL_ITEMS = new LinkedList<>();
 
@@ -34,9 +33,14 @@ public class Server {
         Configurator.setLevel("ODIM", Level.INFO);
         LOGGER.info("<SERVER> Logger online.");
         int port = 7999;
+        SERVER_WINDOW.setSize(500, 200);
+        SERVER_WINDOW.setLayout(new FlowLayout());
         JButton saveToJSONFile = new JButton("Save to file");
         saveToJSONFile.addActionListener(new SaveToJSONAction());
+        JButton loadFromJSONFile = new JButton("Load from file");
+        loadFromJSONFile.addActionListener(new LoadFromJSONAction());
         SERVER_WINDOW.add(saveToJSONFile);
+        SERVER_WINDOW.add(loadFromJSONFile);
         SERVER_WINDOW.setVisible(true);
 
 
@@ -82,13 +86,13 @@ public class Server {
     }
 
     public static void saveToJSONFile() throws IOException {
-        File saveLocation = new File("src/com/earthmelon/odim/server/item_list.json");
 
-        if (saveLocation.exists()) {
+
+        if (itemSaveLocation.exists()) {
             LOGGER.info("<SERVER> Item list file detected.");
         } else {
             LOGGER.info("<SERVER> Item list file not detected, creating a new one.");
-            saveLocation.createNewFile();
+            itemSaveLocation.createNewFile();
         }
         JSONObject allItems = new JSONObject();
         for (Item item : ALL_ITEMS) {
@@ -103,7 +107,37 @@ public class Server {
             allItems.put(String.valueOf(item.getId()), itemObject);
 
         }
-        Files.writeString(saveLocation.toPath(), allItems.toString()
-                .replace("{", "{\n").replace("}", "\n}"));
+        Files.writeString(itemSaveLocation.toPath(), allItems.toString());
+//                .replace("{", "{\n").replace("}", "\n}"));
+    }
+
+    /**
+     * Reads in the JSON data from saveToJSONFile().
+     * Does not support anything other than maintaining id, name, and description.
+     */
+    public static void loadItemsFromJSON() {
+        ALL_ITEMS.clear();
+        Item.ID_COUNT = 0;
+
+        String jsonString = null;
+        try (BufferedReader reader = new BufferedReader(new FileReader(itemSaveLocation))) {
+            jsonString = reader.readLine();
+        } catch (FileNotFoundException e) {
+            LOGGER.error("Item save file not detected!");
+        } catch (IOException e) {
+            LOGGER.error(e);
+        }
+
+        assert jsonString != null; // What happens when this fails?
+        JSONObject obj = new JSONObject(jsonString);
+        for (int i = 0; i < obj.length(); i++) {
+
+            String itemNameJSON = obj.getJSONObject(String.valueOf(i)).getString("name");
+            String itemDescriptionJSON = obj.getJSONObject(String.valueOf(i)).getString("description");
+//            LinkedList<Integer> itemSizeJSON = obj.getJSONObject(String.valueOf(i)).getJSONArray("size");
+            Item reconstructedItem = new Item(itemNameJSON, itemDescriptionJSON, 0, 0, 0);
+            ALL_ITEMS.add(reconstructedItem);
+        }
+        System.out.println(ALL_ITEMS);
     }
 }
