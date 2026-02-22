@@ -33,6 +33,8 @@ public class Server {
         Configurator.setLevel("ODIM", Level.INFO);
         LOGGER.info("<SERVER> Logger online.");
         int port = 7999;
+
+        // Window layout
         SERVER_WINDOW.setSize(500, 200);
         SERVER_WINDOW.setLayout(new FlowLayout());
         JButton saveToJSONFile = new JButton("Save to file");
@@ -43,12 +45,13 @@ public class Server {
         SERVER_WINDOW.add(loadFromJSONFile);
         SERVER_WINDOW.setVisible(true);
 
-
-        ServerSocket s = new ServerSocket(port);
+        // Make main not throw Exception.
+        ServerSocket serverSocket = new ServerSocket(port);
         LOGGER.info("<SERVER> Server established, awaiting connection.");
-        Socket client = s.accept();
+        Socket client = serverSocket.accept(); // Waits until a connection to a client is established.
         LOGGER.info("<SERVER> Connection established at port {}", port);
         ObjectInputStream dataFromClientStream = new ObjectInputStream(client.getInputStream());
+        ObjectOutputStream dataToClientsStream = new ObjectOutputStream(client.getOutputStream()); // To be used for sending loaded items to the clients.
 
         while (true) {
 //            ObjectOutputStream allItemsForClientSync = new ObjectOutputStream(client.getOutputStream());
@@ -57,7 +60,7 @@ public class Server {
                 fromClient = dataFromClientStream.readObject();
             } catch (EOFException | SocketException e) {
                 LOGGER.info("<SERVER> Client disconnected, waiting...");
-                client = s.accept();
+                client = serverSocket.accept();
                 LOGGER.info("<SERVER> Client reconnected.");
                 dataFromClientStream = new ObjectInputStream(client.getInputStream());
                 fromClient = dataFromClientStream.readObject();
@@ -85,9 +88,13 @@ public class Server {
         }
     }
 
+    /**
+     * Saves an item to a JSON named item_list.json
+     * Items are indexed by their ids, with other fields listed as plaintext
+     * or JSONArrays.
+     * @throws IOException while creating a new file.
+     */
     public static void saveToJSONFile() throws IOException {
-
-
         if (itemSaveLocation.exists()) {
             LOGGER.info("<SERVER> Item list file detected.");
         } else {
@@ -109,6 +116,7 @@ public class Server {
         }
         Files.writeString(itemSaveLocation.toPath(), allItems.toString());
 //                .replace("{", "{\n").replace("}", "\n}"));
+        LOGGER.info("<SERVER> Items successfully added.");
     }
 
     /**
@@ -131,10 +139,10 @@ public class Server {
         assert jsonString != null; // What happens when this fails?
         JSONObject obj = new JSONObject(jsonString);
         for (int i = 0; i < obj.length(); i++) {
-
-            String itemNameJSON = obj.getJSONObject(String.valueOf(i)).getString("name");
-            String itemDescriptionJSON = obj.getJSONObject(String.valueOf(i)).getString("description");
-//            LinkedList<Integer> itemSizeJSON = obj.getJSONObject(String.valueOf(i)).getJSONArray("size");
+            JSONObject singleItem = obj.getJSONObject(String.valueOf(i));
+            String itemNameJSON = singleItem.getString("name");
+            String itemDescriptionJSON = singleItem.getString("description");
+//            LinkedList<Integer> itemSizeJSON = singleItem.getJSONArray("size");
             Item reconstructedItem = new Item(itemNameJSON, itemDescriptionJSON, 0, 0, 0);
             ALL_ITEMS.add(reconstructedItem);
         }
