@@ -30,6 +30,7 @@ public class Server {
     public static LinkedList<Item> ALL_ITEMS = new LinkedList<>();
 
     public static void main(String[] args) throws Exception {
+
         Configurator.setLevel("ODIM", Level.INFO);
         LOGGER.info("<SERVER> Logger online.");
         int port = 7999;
@@ -51,7 +52,6 @@ public class Server {
         Socket client = serverSocket.accept(); // Waits until a connection to a client is established.
         LOGGER.info("<SERVER> Connection established at port {}", port);
         ObjectInputStream dataFromClientStream = new ObjectInputStream(client.getInputStream());
-        ObjectOutputStream dataToClientsStream = new ObjectOutputStream(client.getOutputStream()); // To be used for sending loaded items to the clients.
 
         while (true) {
 //            ObjectOutputStream allItemsForClientSync = new ObjectOutputStream(client.getOutputStream());
@@ -146,6 +146,6 @@ public class Server {
             Item reconstructedItem = new Item(itemNameJSON, itemDescriptionJSON, 0, 0, 0);
             ALL_ITEMS.add(reconstructedItem);
         }
-        System.out.println(ALL_ITEMS);
+        LOGGER.info("<SERVER> Items loaded from file successfully.");
     }
 }
