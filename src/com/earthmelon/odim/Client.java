@@ -31,10 +31,12 @@ public class Client {
         os.writeObject("Connection established.");
         os.close();
 
-        assembleUI();
+        new Client().assembleUI();
     }
 
-    static void assembleUI() {
+    Client() {}
+
+    void assembleUI() {
         MAIN_WINDOW.setSize(400, 400);
 
         // Ends the program when the window closes.
@@ -49,13 +51,16 @@ public class Client {
         ITEM_LIST_PANEL.setSize(200,2000);
         ITEM_LIST_PANEL.setBorder(new BevelBorder(0, Color.BLACK, Color.BLACK));
 
-        JButton addItem = new JButton("Add Item");
-        addItem.addActionListener(new CreateItemPanelAction());
-        addItem.setBounds(0,0,50,50);
-        addItem.setActionCommand("add_item");
+        if (this instanceof HostClient) {
+            JButton addItem = new JButton("Add Item");
+            addItem.addActionListener(new CreateItemPanelAction());
+            addItem.setBounds(0, 0, 50, 50);
+            addItem.setActionCommand("add_item");
+            MAIN_WINDOW.add(addItem, BorderLayout.WEST);
+        }
 
         MAIN_WINDOW.add(ITEM_LIST_PANEL);
-        MAIN_WINDOW.add(addItem, BorderLayout.WEST);
+
 
         MAIN_WINDOW.setVisible(true);
     }

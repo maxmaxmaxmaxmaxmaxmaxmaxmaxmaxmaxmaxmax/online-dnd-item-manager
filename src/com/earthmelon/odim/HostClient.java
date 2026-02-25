@@ -13,7 +13,7 @@ public class HostClient extends Client {
         ObjectOutputStream os = new ObjectOutputStream(clientSocket.getOutputStream());
         os.writeObject("Connection established.");
 
-        assembleUI();
+        new HostClient().assembleUI();
 
         while (!clientSocket.isClosed()) {
             if (MY_KNOWN_ITEMS.size() > previousSize) {

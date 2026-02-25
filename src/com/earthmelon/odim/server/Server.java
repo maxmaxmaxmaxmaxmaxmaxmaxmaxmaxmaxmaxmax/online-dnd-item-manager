@@ -49,42 +49,9 @@ public class Server {
         // Make main not throw Exception.
         ServerSocket serverSocket = new ServerSocket(port);
         LOGGER.info("<SERVER> Server established, awaiting connection.");
-        Socket client = serverSocket.accept(); // Waits until a connection to a client is established.
-        LOGGER.info("<SERVER> Connection established at port {}", port);
-        ObjectInputStream dataFromClientStream = new ObjectInputStream(client.getInputStream());
-
         while (true) {
-//            ObjectOutputStream allItemsForClientSync = new ObjectOutputStream(client.getOutputStream());
-            Object fromClient;
-            try {
-                fromClient = dataFromClientStream.readObject();
-            } catch (EOFException | SocketException e) {
-                LOGGER.info("<SERVER> Client disconnected, waiting...");
-                client = serverSocket.accept();
-                LOGGER.info("<SERVER> Client reconnected.");
-                dataFromClientStream = new ObjectInputStream(client.getInputStream());
-                fromClient = dataFromClientStream.readObject();
-            }
-
-            if (fromClient instanceof LinkedList<?> clientList) {
-                LOGGER.info("<SERVER> Item list received: {}.", clientList);
-                for (Object object : clientList) {
-                    if (object instanceof Item item) {
-                        if (ALL_ITEMS.contains(item)) {
-                            LOGGER.info("<SERVER> Id {} already in list.", item.getId());
-                            continue;
-                        }
-                        ALL_ITEMS.add(item);
-                        LOGGER.info("<SERVER> Item added: {}", item);
-                    } else {
-                        LOGGER.error("<SERVER> Object {} is not of type Item, but instead {}", object, object.getClass());
-                    }
-                }
-                LOGGER.info("<SERVER> Server item list now: {}", ALL_ITEMS);
-            }
-            if (fromClient instanceof String str) {
-                LOGGER.info("<CLIENT> {}", str);
-            }
+            new MultiServerThread(serverSocket.accept()).start(); // Creates a connection with a client
+            LOGGER.info("<SERVER> Connection established at port {}", port); // replace with better log showing client name and ip.
         }
     }
 
