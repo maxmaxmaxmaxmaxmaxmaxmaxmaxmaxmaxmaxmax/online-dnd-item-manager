@@ -29,23 +29,12 @@ public class Client {
         Socket clientSocket = new Socket(host, port);
         ObjectOutputStream os = new ObjectOutputStream(clientSocket.getOutputStream());
         os.writeObject("Connection established.");
+        os.close();
 
         assembleUI();
-
-        while (!clientSocket.isClosed()) {
-            if (MY_KNOWN_ITEMS.size() > previousSize) {
-                os.reset();
-                os.writeObject("Writing list: " + MY_KNOWN_ITEMS);
-                // Added item gets sent here but not when added via AddItemAction.
-//                MY_KNOWN_ITEMS.add(new Item("Test Item", "Test Description", 0,0,0));
-                os.writeObject(MY_KNOWN_ITEMS);
-                previousSize = MY_KNOWN_ITEMS.size();
-            }
-        }
-        os.close();
     }
 
-    private static void assembleUI() {
+    static void assembleUI() {
         MAIN_WINDOW.setSize(400, 400);
 
         // Ends the program when the window closes.
