@@ -30,34 +30,29 @@ public class MultiServerThread extends Thread {
             Object fromClient = null;
             try {
                 fromClient = dataFromClientStream.readObject();
-            } catch (EOFException | SocketException e) {
-//                Server.LOGGER.info("<SERVER> Client disconnected, waiting...");
-//                client = serverSocket.accept();
-//                LOGGER.info("<SERVER> Client reconnected.");
-//                dataFromClientStream = new ObjectInputStream(client.getInputStream());
-//                fromClient = dataFromClientStream.readObject();
+            } catch (SocketException e) {
+                LOGGER.info("<THREAD> Client disconnected, stopping thread.");
+                CLIENT_CONNECTION_COUNT--;
+                return;
             } catch (IOException | ClassNotFoundException e) {
                 throw new RuntimeException(e);
             }
 
             if (fromClient instanceof LinkedList<?> clientList) {
-                LOGGER.info("<SERVER> Item list received: {}.", clientList);
+                LOGGER.info("<THREAD> Item list received: {}.", clientList);
                 for (Object object : clientList) {
                     if (object instanceof Item item) {
                         if (ALL_ITEMS.contains(item)) {
-                            LOGGER.info("<SERVER> Id {} already in list.", item.getId());
+                            LOGGER.info("<THREAD> Id {} already in list.", item.getId());
                             continue;
                         }
                         ALL_ITEMS.add(item);
-                        LOGGER.info("<SERVER> Item added: {}", item);
+                        LOGGER.info("<THREAD> Item added: {}", item);
                     } else {
-                        LOGGER.error("<SERVER> Object {} is not of type Item, but instead {}", object, object.getClass());
+                        LOGGER.error("<THREAD> Object {} is not of type Item, but instead {}", object, object.getClass());
                     }
                 }
-                LOGGER.info("<SERVER> Server item list now: {}", ALL_ITEMS);
-            }
-            if (fromClient instanceof String str) {
-                LOGGER.info("<CLIENT> {}", str);
+                LOGGER.info("<THREAD> Server item list now: {}", ALL_ITEMS);
             }
         }
     }

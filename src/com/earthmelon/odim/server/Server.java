@@ -12,11 +12,11 @@ import javax.swing.*;
 import org.json.*;
 
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.*;
 
 import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketException;
 
 import java.nio.file.Files;
 import java.util.LinkedList;
@@ -26,14 +26,23 @@ public class Server {
     public static Logger LOGGER = LogManager.getLogger("ODIM");
     public static final JFrame SERVER_WINDOW = new JFrame("ODIMServer");
     public static File itemSaveLocation = new File("src/com/earthmelon/odim/server/item_list.json");
+    public static int CLIENT_CONNECTION_COUNT = 0;
+    public static int PORT = 7999;
 
     public static LinkedList<Item> ALL_ITEMS = new LinkedList<>();
 
-    public static void main(String[] args) throws Exception {
+    Server() {}
+
+    public static void main(String[] args) {
 
         Configurator.setLevel("ODIM", Level.INFO);
         LOGGER.info("<SERVER> Logger online.");
-        int port = 7999;
+        SERVER_WINDOW.addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent windowEvent){
+                LOGGER.info("<SERVER> Server closing due to manual interrupt.");
+                System.exit(0);
+            }
+        });
 
         // Window layout
         SERVER_WINDOW.setSize(500, 200);
@@ -47,11 +56,16 @@ public class Server {
         SERVER_WINDOW.setVisible(true);
 
         // Make main not throw Exception.
-        ServerSocket serverSocket = new ServerSocket(port);
-        LOGGER.info("<SERVER> Server established, awaiting connection.");
-        while (true) {
-            new MultiServerThread(serverSocket.accept()).start(); // Creates a connection with a client
-            LOGGER.info("<SERVER> Connection established at port {}", port); // replace with better log showing client name and ip.
+        try (ServerSocket serverSocket = new ServerSocket(PORT)) {
+            LOGGER.info("<SERVER> Server established, awaiting connection.");
+            while (true) {
+                new MultiServerThread(serverSocket.accept()).start(); // Creates a connection with a client
+                LOGGER.info("<SERVER> Connection established at port {}", PORT); // replace with better log showing client name and ip.
+                CLIENT_CONNECTION_COUNT++;
+            }
+        } catch(IOException e) {
+            LOGGER.error("<SERVER> Exception while opening server socket: {}", e);
+            System.exit(1);
         }
     }
 

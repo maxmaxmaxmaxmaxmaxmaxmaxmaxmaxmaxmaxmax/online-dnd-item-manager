@@ -2,6 +2,8 @@ package com.earthmelon.odim;
 
 import com.earthmelon.odim.item.CreateItemPanelAction;
 import com.earthmelon.odim.item.Item;
+import com.earthmelon.odim.server.Server;
+import static com.earthmelon.odim.server.Server.LOGGER;
 
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
@@ -22,14 +24,19 @@ public class Client {
 
     static int previousSize = 0;
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
 
         String host = "localhost";
-        int port = 7999;
-        Socket clientSocket = new Socket(host, port);
-        ObjectOutputStream os = new ObjectOutputStream(clientSocket.getOutputStream());
-        os.writeObject("Connection established.");
-        os.close();
+        Socket clientSocket = null;
+        try {
+            clientSocket = new Socket(host, Server.PORT);
+            ObjectOutputStream os = new ObjectOutputStream(clientSocket.getOutputStream());
+            LOGGER.info("<CLIENT> Connection established.");
+            os.close();
+        } catch (IOException e) {
+            LOGGER.error("<CLIENT> Failed to open client socket: {}", String.valueOf(e));
+            System.exit(1);
+        }
 
         new Client().assembleUI();
     }
@@ -42,7 +49,6 @@ public class Client {
         // Ends the program when the window closes.
         MAIN_WINDOW.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent windowEvent){
-                System.out.println(MY_KNOWN_ITEMS);
                 System.exit(0);
             }
         });
