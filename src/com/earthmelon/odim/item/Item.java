@@ -50,6 +50,15 @@ public class Item implements Serializable {
         this.value = values;
     }
 
+    // To be used only to alter a currently existing Item, not to create a new one.
+    private Item(String name, String description, List<Integer> dimensions, int[] values, int id) {
+        this.name = name;
+        this.description = description;
+        this.id = id;
+        this.size = List.of(dimensions.get(0), dimensions.get(1));
+        this.value = values;
+    }
+
     public String getName() {
         return name;
     }
@@ -75,11 +84,11 @@ public class Item implements Serializable {
     }
 
     public Item rotate() {
-        return new Item(this.name, this.description, this.size.reversed(), this.value);
+        return new Item(this.name, this.description, this.size.reversed(), this.value, this.id);
     }
 
     public Item convertToFewestCoins() {
-        return new Item(this.name, this.description, this.size, this.value)
+        return new Item(this.name, this.description, this.size, this.value, this.id)
                 .exchangeOneCurrency(3, 100)
                 .exchangeOneCurrency(2, 100)
                 .exchangeOneCurrency(1, 10);
@@ -94,7 +103,7 @@ public class Item implements Serializable {
 
     @Override
     public String toString() {
-        return id + " " + name + ": " + description;
+        return id + " " + name;
     }
 
     @Override

@@ -29,6 +29,7 @@ public class TestItem {
         Item tested = new Item("Test Item", "Test description", 0,0,1000);
         int[] correct = new int[]{0,0,10,0};
         assertArrayEquals(correct, tested.convertToFewestCoins().getValue());
+        assertEquals(tested.getId(), tested.convertToFewestCoins().getId());
     }
 
     @org.junit.Test
