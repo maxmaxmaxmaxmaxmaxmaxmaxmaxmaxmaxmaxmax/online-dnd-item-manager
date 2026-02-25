@@ -1,6 +1,7 @@
 package com.earthmelon.odim.item;
 
-import com.earthmelon.odim.Client;
+import com.earthmelon.odim.client.Client;
+import com.earthmelon.odim.server.Server;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -21,9 +22,8 @@ public class AddItemAction implements ActionListener {
         Random random = new Random();
         Item newItem = new Item("Test Item", "Test description", 0,0, random.nextInt(100));
         Client.MY_KNOWN_ITEMS.add(newItem);
-        Client.ITEM_LIST_PANEL.add(new JLabel(newItem.getName()));
-        Client.ITEM_LIST_PANEL.revalidate();
-        Client.ITEM_LIST_PANEL.repaint();
+        Client.addToItemPanel(newItem);
+
         CreateItemPanelAction.ITEM_WINDOW.dispose();
     }
 }

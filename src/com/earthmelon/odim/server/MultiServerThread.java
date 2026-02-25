@@ -9,31 +9,35 @@ import java.util.LinkedList;
 import static com.earthmelon.odim.server.Server.*;
 
 public class MultiServerThread extends Thread {
-    private Socket socket = null;
+    public ObjectInputStream dataFromClientStream = null;
+    public ObjectOutputStream dataToClientStream = null;
 
     public MultiServerThread(Socket socket) {
         super("MultiServerThread");
-        this.socket = socket;
-    }
-
-    public void run() {
-
-        ObjectInputStream dataFromClientStream = null;
         try {
+            dataToClientStream = new ObjectOutputStream(socket.getOutputStream());
+            LOGGER.info("<THREAD> Server output stream created.");
+            dataToClientStream.flush();
             dataFromClientStream = new ObjectInputStream(socket.getInputStream());
+            LOGGER.info("<THREAD> Server input stream created.");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
 
+    public void run() {
+        Server.flushToClients(ALL_ITEMS);
         while (true) {
-//            ObjectOutputStream allItemsForClientSync = new ObjectOutputStream(client.getOutputStream());
             Object fromClient = null;
             try {
                 fromClient = dataFromClientStream.readObject();
             } catch (SocketException e) {
                 LOGGER.info("<THREAD> Client disconnected, stopping thread.");
+                ALL_THREADS.remove(this);
                 CLIENT_CONNECTION_COUNT--;
                 return;
+            } catch (EOFException e) {
+                continue;
             } catch (IOException | ClassNotFoundException e) {
                 throw new RuntimeException(e);
             }
@@ -46,7 +50,7 @@ public class MultiServerThread extends Thread {
                             LOGGER.info("<THREAD> Id {} already in list.", item.getId());
                             continue;
                         }
-                        ALL_ITEMS.add(item);
+                        ALL_ITEMS.add(item); // TODO: Item list not being sent to server with updated item list.
                         LOGGER.info("<THREAD> Item added: {}", item);
                     } else {
                         LOGGER.error("<THREAD> Object {} is not of type Item, but instead {}", object, object.getClass());

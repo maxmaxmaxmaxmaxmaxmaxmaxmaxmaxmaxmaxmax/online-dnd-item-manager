@@ -19,15 +19,18 @@ import java.io.*;
 import java.net.ServerSocket;
 
 import java.nio.file.Files;
+
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class Server {
 
-    public static Logger LOGGER = LogManager.getLogger("ODIM");
+    public static final Logger LOGGER = LogManager.getLogger("ODIM");
     public static final JFrame SERVER_WINDOW = new JFrame("ODIMServer");
-    public static File itemSaveLocation = new File("src/com/earthmelon/odim/server/item_list.json");
+    public static final File itemSaveLocation = new File("src/com/earthmelon/odim/server/item_list.json");
     public static int CLIENT_CONNECTION_COUNT = 0;
-    public static int PORT = 7999;
+    public static final int PORT = 7999;
+    public static ArrayList<MultiServerThread> ALL_THREADS = new ArrayList<>();
 
     public static LinkedList<Item> ALL_ITEMS = new LinkedList<>();
 
@@ -39,6 +42,12 @@ public class Server {
         LOGGER.info("<SERVER> Logger online.");
         SERVER_WINDOW.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent windowEvent){
+                try {
+                    saveToJSONFile();
+                    LOGGER.info("<SERVER> Items saved successfully.");
+                } catch (IOException e) {
+                    LOGGER.error("<SERVER> Failed to save items to .json file when closing: {}", String.valueOf(e));
+                }
                 LOGGER.info("<SERVER> Server closing due to manual interrupt.");
                 System.exit(0);
             }
@@ -54,17 +63,19 @@ public class Server {
         SERVER_WINDOW.add(saveToJSONFile);
         SERVER_WINDOW.add(loadFromJSONFile);
         SERVER_WINDOW.setVisible(true);
+        loadItemsFromJSON();
 
-        // Make main not throw Exception.
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
             LOGGER.info("<SERVER> Server established, awaiting connection.");
             while (true) {
-                new MultiServerThread(serverSocket.accept()).start(); // Creates a connection with a client
+                MultiServerThread thread = new MultiServerThread(serverSocket.accept());// Creates a connection with a client
+                thread.start();
+                ALL_THREADS.add(thread);
                 LOGGER.info("<SERVER> Connection established at port {}", PORT); // replace with better log showing client name and ip.
                 CLIENT_CONNECTION_COUNT++;
             }
         } catch(IOException e) {
-            LOGGER.error("<SERVER> Exception while opening server socket: {}", e);
+            LOGGER.error("<SERVER> Exception while opening server socket: {}", String.valueOf(e));
             System.exit(1);
         }
     }
@@ -112,7 +123,7 @@ public class Server {
         try (BufferedReader reader = new BufferedReader(new FileReader(itemSaveLocation))) {
             jsonString = reader.readLine();
         } catch (FileNotFoundException e) {
-            LOGGER.error("Item save file not detected!");
+            LOGGER.error("<SERVER> Item save file not detected!");
         } catch (IOException e) {
             LOGGER.error(e);
         }
@@ -128,5 +139,16 @@ public class Server {
             ALL_ITEMS.add(reconstructedItem);
         }
         LOGGER.info("<SERVER> Items loaded from file successfully.");
+    }
+
+    public static void flushToClients(Object o) {
+        for (MultiServerThread thread : ALL_THREADS) {
+            try {
+                thread.dataToClientStream.writeObject(o);
+            } catch (IOException e) {
+                LOGGER.error("Failed to push data {} to thread {}, {}", o, thread, e);
+//                throw new RuntimeException(e);
+            }
+        }
     }
 }

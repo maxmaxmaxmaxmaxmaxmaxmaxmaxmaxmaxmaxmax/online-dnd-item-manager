@@ -19,6 +19,5 @@ public class TestConnection {
         } catch (IOException e) {
             fail("Server failed to open at the port: " + LOCAL_PORT);
         }
-
     }
 }
