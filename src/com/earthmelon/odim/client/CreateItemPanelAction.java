@@ -1,11 +1,15 @@
-package com.earthmelon.odim.item;
+package com.earthmelon.odim.client;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class CreateItemPanelAction implements ActionListener {
+public class CreateItemPanelAction extends ClientAction implements ActionListener {
     public static JFrame ITEM_WINDOW;
+
+    public CreateItemPanelAction(Client client) {
+        super(client);
+    }
 
     /**
      * Invoked when an action occurs.
@@ -18,7 +22,7 @@ public class CreateItemPanelAction implements ActionListener {
 
         ITEM_WINDOW.setSize(400,200);
         JButton DONE_BUTTON = new JButton("AddItemDone");
-        DONE_BUTTON.addActionListener(new AddItemAction());
+        DONE_BUTTON.addActionListener(new AddItemAction(client));
         ITEM_WINDOW.add(DONE_BUTTON);
 
         ITEM_WINDOW.setVisible(true);

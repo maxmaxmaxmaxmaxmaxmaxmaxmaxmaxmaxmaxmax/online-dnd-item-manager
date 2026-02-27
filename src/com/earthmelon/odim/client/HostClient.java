@@ -1,6 +1,5 @@
 package com.earthmelon.odim.client;
 
-import com.earthmelon.odim.item.CreateItemPanelAction;
 import com.earthmelon.odim.server.Server;
 
 import javax.swing.*;
@@ -17,10 +16,7 @@ import static com.earthmelon.odim.server.Server.LOGGER;
 
 public class HostClient extends Client {
 
-    HostClient() {}
-
-    public static void main(String[] args) {
-
+    HostClient() {
         String host = "localhost";
         Socket clientSocket = null;
 
@@ -30,29 +26,31 @@ public class HostClient extends Client {
             dataFromServerStream = new ObjectOutputStream(clientSocket.getOutputStream());
             LOGGER.info("<CLIENT> Server input stream established.");
             dataFromServerStream.flush();
-            dataToServerStream = new ObjectInputStream(clientSocket.getInputStream());
-            LOGGER.info("<CLIENT> Server output stream established.");
+
             assembleUI();
 
             while (!clientSocket.isClosed()) {
                 if (MY_KNOWN_ITEMS.size() > previousSize) {
-                    dataFromServerStream.reset();
-                    LOGGER.info("<CLIENT> Writing list: {}", MY_KNOWN_ITEMS);
+                    dataFromServerStream.flush();
                     dataFromServerStream.writeObject(MY_KNOWN_ITEMS);
+                    LOGGER.info("<CLIENT> Item list {} successfully sent to server.", MY_KNOWN_ITEMS);
                     previousSize = MY_KNOWN_ITEMS.size();
                 }
-                readFromServer();
+                readFromServer(clientSocket);
             }
             dataFromServerStream.close();
         } catch (IOException e) {
-            LOGGER.error("Failed to open client socket: {}", String.valueOf(e));
+            LOGGER.error("<CLIENT> Failed to open client socket: {}", String.valueOf(e));
             System.exit(1);
         }
 
-
     }
 
-    static void assembleUI() {
+    public static void main(String[] args) {
+        new HostClient();
+    }
+
+    void assembleUI() {
         MAIN_WINDOW.setSize(400, 400);
 
         // Ends the program when the window closes.
@@ -67,7 +65,7 @@ public class HostClient extends Client {
         ITEM_LIST_PANEL.setBorder(new BevelBorder(0, Color.BLACK, Color.BLACK));
 
         JButton addItem = new JButton("Add Item");
-        addItem.addActionListener(new CreateItemPanelAction());
+        addItem.addActionListener(new CreateItemPanelAction(this));
         addItem.setBounds(0, 0, 50, 50);
         addItem.setActionCommand("add_item");
         MAIN_WINDOW.add(addItem, BorderLayout.WEST);

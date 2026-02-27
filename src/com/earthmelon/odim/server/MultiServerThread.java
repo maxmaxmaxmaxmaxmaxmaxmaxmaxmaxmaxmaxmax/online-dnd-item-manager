@@ -1,5 +1,7 @@
 package com.earthmelon.odim.server;
 
+import com.earthmelon.odim.client.Client;
+import com.earthmelon.odim.client.ClientAction;
 import com.earthmelon.odim.item.Item;
 
 import java.net.*;

@@ -1,6 +1,5 @@
 package com.earthmelon.odim.client;
 
-import com.earthmelon.odim.item.CreateItemPanelAction;
 import com.earthmelon.odim.item.Item;
 import com.earthmelon.odim.server.Server;
 import static com.earthmelon.odim.server.Server.LOGGER;
@@ -22,25 +21,24 @@ public class Client {
     public static final JFrame MAIN_WINDOW = new JFrame("ODIM");
 
     public static JPanel ITEM_LIST_PANEL = new JPanel();
-    public static LinkedList<Item> MY_KNOWN_ITEMS = new LinkedList<>();
+    public LinkedList<Item> MY_KNOWN_ITEMS = new LinkedList<>();
 
     public static ObjectOutputStream dataFromServerStream = null;
-    public static ObjectInputStream dataToServerStream = null;
+    public ObjectInputStream dataToServerStream = null;
 
     static int previousSize = 0;
 
-    public static void main(String[] args) {
+    public Client() {
         String host = "localhost";
         try (Socket clientSocket = new Socket(host, Server.PORT)) {
             LOGGER.info("<CLIENT> Connection established.");
             dataFromServerStream = new ObjectOutputStream(clientSocket.getOutputStream());
             LOGGER.info("<CLIENT> Server input stream established.");
             dataFromServerStream.flush();
-            dataToServerStream = new ObjectInputStream(clientSocket.getInputStream());
-            LOGGER.info("<CLIENT> Server output stream established.");
+
             assembleUI();
             while (MAIN_WINDOW.isVisible()) {
-                readFromServer();
+                readFromServer(clientSocket);
             }
         } catch (IOException e) {
             LOGGER.error("<CLIENT> Failed to open client socket: {}", String.valueOf(e));
@@ -49,7 +47,11 @@ public class Client {
 
     }
 
-    static void assembleUI() {
+    public static void main(String[] args) {
+       new Client();
+    }
+
+    void assembleUI() {
         MAIN_WINDOW.setSize(400, 400);
 
         // Ends the program when the window closes.
@@ -68,9 +70,11 @@ public class Client {
         MAIN_WINDOW.setVisible(true);
     }
 
-    static void readFromServer() {
+    void readFromServer(Socket clientSocket) {
         Object fromServer = null;
         try {
+            ObjectInputStream dataToServerStream = new ObjectInputStream(clientSocket.getInputStream());
+            LOGGER.info("<CLIENT> Server output stream established.");
             fromServer = dataToServerStream.readObject();
             if (fromServer instanceof LinkedList<?> list) {
                 if (list.getFirst() instanceof Item) {
